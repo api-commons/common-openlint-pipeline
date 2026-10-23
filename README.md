@@ -1,15 +1,15 @@
-<p align="center"><a href="https://spotlight-rules.com"><img src="https://raw.githubusercontent.com/api-commons/spotlight-pipeline/main/spotlight-rules-logo.png" alt="Spotlight Rules" height="90"></a></p>
+# API Commons OpenLint Pipeline
 
-# Spotlight Pipeline
-
-**Governance as code.** Drop your [Spotlight](https://spotlight-rules.com) ruleset into
+**Governance as code.** Drop your [OpenLint](https://openlint.org) ruleset into
 CI and every change to your API descriptions is linted against it — as a gate. This
-repo is a set of **thin, reusable CI integrations** that all run
-[spotlight-cli](https://github.com/api-commons/spotlight-cli) the same way, with the
+repo is a set of **thin, reusable CI integrations** that all run the
+[OpenLint CLI](https://www.npmjs.com/package/openlint) (`npx openlint`) the same way, with the
 same inputs (files, ruleset, severity threshold) across platforms.
 
 The unit you "deploy" is **your ruleset + a fail-severity** — see
-[`.spotlight.example.yaml`](./.spotlight.example.yaml).
+[`.openlint.example.yaml`](./.openlint.example.yaml). Built-in rulesets are
+`spectral:oas`, `spectral:asyncapi` and `spectral:arazzo`; the CLI reads both
+`.openlint.yaml` and `.spectral.yaml`.
 
 ## GitHub Actions
 
@@ -19,29 +19,29 @@ Use the action directly:
 # .github/workflows/api-governance.yml
 on: [pull_request]
 jobs:
-  spotlight:
+  openlint:
     runs-on: ubuntu-latest
     permissions: { contents: read, security-events: write }
     steps:
       - uses: actions/checkout@v4
-      - uses: api-commons/spotlight-pipeline@v1
+      - uses: api-commons/common-openlint-pipeline@v1
         with:
           files: 'apis/**/openapi.yaml'
-          ruleset: '.spotlight.yaml'
+          ruleset: '.openlint.yaml'
           fail-severity: 'error'
-          sarif: 'spotlight.sarif'           # optional → code scanning
+          sarif: 'openlint.sarif'           # optional → code scanning
       - if: always()
         uses: github/codeql-action/upload-sarif@v3
-        with: { sarif_file: spotlight.sarif }
+        with: { sarif_file: openlint.sarif }
 ```
 
 | Input | Default | Description |
 | --- | --- | --- |
 | `files` | `**/{openapi,swagger,asyncapi,arazzo}.{yaml,yml,json}` | Glob(s) to lint |
-| `ruleset` | `.spotlight.yaml` | Your ruleset (a default extending the built-ins is used if absent) |
+| `ruleset` | `.openlint.yaml` | Your ruleset (a default extending the built-ins is used if absent) |
 | `fail-severity` | `error` | Fail on this severity or worse (`error`/`warn`/`info`/`hint`) |
 | `sarif` | _(off)_ | Also write a SARIF report for GitHub code scanning |
-| `version` | `latest` | spotlight-cli version |
+| `version` | `latest` | OpenLint CLI (`openlint` on npm) version |
 
 It emits inline **PR annotations** (`--format github-actions`) and a readable summary,
 and fails the job per `fail-severity`.
@@ -49,37 +49,29 @@ and fails the job per `fail-severity`.
 ## Other platforms
 
 Copy the matching template from [`templates/`](./templates) — all run the same
-`spotlight-cli lint … --ruleset … --fail-severity …`, publishing findings natively:
+`openlint lint … --ruleset … --fail-severity …`, publishing findings natively:
 
 - **GitLab CI** — [`templates/gitlab-ci.yml`](./templates/gitlab-ci.yml) (JUnit report)
 - **Bitbucket Pipelines** — [`templates/bitbucket-pipelines.yml`](./templates/bitbucket-pipelines.yml)
 - **Azure DevOps** — [`templates/azure-pipelines.yml`](./templates/azure-pipelines.yml) (JUnit)
 - **AWS CodeBuild** — [`templates/aws-buildspec.yml`](./templates/aws-buildspec.yml) (JUnit report)
 
-## Governing agent skills (SKILL.md)
+## Agent skills (SKILL.md)
 
-Spotlight also lints **agent skills** (`SKILL.md`) — the cli parses the YAML frontmatter and
-the markdown body, and `spotlight:skill` governs name/description/license/allowed-tools plus
-body structure. Gate them in CI with [`templates/skill-governance.yml`](./templates/skill-governance.yml)
-and a ruleset extending `spotlight:skill` (see [`.spotlight-skill.example.yaml`](./.spotlight-skill.example.yaml)):
+Earlier versions of this pipeline shipped a skill-governance template that linted
+`SKILL.md` files. That depended on a markdown/frontmatter parser and a built-in skill
+ruleset that the OpenLint CLI does not have (it parses only YAML/JSON documents), so the
+template has been removed. API descriptions — OpenAPI, AsyncAPI, Arazzo — are fully governed.
 
-```yaml
-- uses: api-commons/spotlight-pipeline@v1
-  with:
-    files: '**/SKILL.md'
-    ruleset: '.spotlight-skill.yaml'   # extends: [spotlight:skill]
-```
+## Part of API Commons
 
-> Skill linting ships with the Spotlight **1.0** cli release. Until then the action governs
-> OpenAPI/AsyncAPI/Arazzo; the skill template is ready to enable on release.
-
-## Part of the Spotlight suite
-
-One engine (the CLI), one vocabulary (the [spec](https://spotlight-rules.com/spec/) +
-its rule tags): spec · cli · api · mcp · vscode · validator · discovery · **pipeline**
-(this repo — governance in delivery). Author rules in the
-[validator](https://validator.spotlight-rules.com), enforce them here.
+One engine (the OpenLint CLI), one vocabulary (the [spec](https://spec.openlint.org) +
+its [rules](https://apicommons.org/rules/)). Author rules in the
+[validator](https://validator.apicommons.org), enforce them here. Related:
+[common-openlint-validator](https://github.com/api-commons/common-openlint-validator) ·
+[common-openlint-api](https://github.com/api-commons/common-openlint-api) ·
+[common-openlint-mcp](https://github.com/api-commons/common-openlint-mcp).
 
 ---
 
-Part of [Spotlight Rules](https://spotlight-rules.com) — a project of [API Evangelist](https://apievangelist.com), maintained openly under [API Commons](https://apicommons.org). Apache-2.0.
+A project of [API Evangelist](https://apievangelist.com), maintained openly under [API Commons](https://apicommons.org). Apache-2.0.

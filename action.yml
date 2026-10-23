@@ -1,5 +1,5 @@
-name: Spotlight Governance
-description: Lint API descriptions (OpenAPI, AsyncAPI, Arazzo, …) with Spotlight as a CI governance gate.
+name: API Commons OpenLint Governance
+description: Lint API descriptions (OpenAPI, AsyncAPI, Arazzo, …) with the OpenLint CLI as a CI governance gate.
 author: API Commons
 branding:
   icon: check-circle
@@ -10,15 +10,15 @@ inputs:
     required: false
     default: '**/{openapi,swagger,asyncapi,arazzo}.{yaml,yml,json}'
   ruleset:
-    description: Path to a Spotlight ruleset. If it does not exist, a default ruleset extending the built-ins is used.
+    description: Path to an OpenLint ruleset. If it does not exist, a default ruleset extending the built-ins is used.
     required: false
-    default: '.spotlight.yaml'
+    default: '.openlint.yaml'
   fail-severity:
     description: Fail the job when a finding of this severity or worse is present (error | warn | info | hint).
     required: false
     default: 'error'
   version:
-    description: spotlight-cli version (npm dist-tag or version).
+    description: openlint CLI version (npm dist-tag or version).
     required: false
     default: 'latest'
   sarif:
@@ -28,18 +28,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Run Spotlight
+    - name: Run OpenLint
       id: gate
       shell: bash
       run: |
         set -euo pipefail
         RULESET="${{ inputs.ruleset }}"
         if [ ! -f "$RULESET" ]; then
-          echo "No ruleset at '$RULESET' — using a default that extends the Spotlight built-ins."
+          echo "No ruleset at '$RULESET' — using a default that extends the OpenLint built-ins."
           RULESET="$(mktemp).yaml"
-          printf 'extends:\n  - ["spotlight:oas", "recommended"]\n' > "$RULESET"
+          printf 'extends:\n  - ["spectral:oas", "recommended"]\n' > "$RULESET"
         fi
-        CLI="@spotlight-rules/spotlight-cli@${{ inputs.version }}"
+        CLI="openlint@${{ inputs.version }}"
         # GitHub annotations (rendered inline on the PR) + the gate; fail per severity.
         # (a single --format prints to stdout; multiple need matching --output.)
         npx -y "$CLI" lint ${{ inputs.files }} \
@@ -51,10 +51,10 @@ runs:
       shell: bash
       run: |
         RULESET="${{ inputs.ruleset }}"
-        [ -f "$RULESET" ] || { RULESET="$(mktemp).yaml"; printf 'extends:\n  - ["spotlight:oas", "recommended"]\n' > "$RULESET"; }
+        [ -f "$RULESET" ] || { RULESET="$(mktemp).yaml"; printf 'extends:\n  - ["spectral:oas", "recommended"]\n' > "$RULESET"; }
         # --output writes the SARIF regardless of exit code; `|| true` so this
         # reporting step never fails the job (the gate is the step above).
-        npx -y "@spotlight-rules/spotlight-cli@${{ inputs.version }}" lint ${{ inputs.files }} \
+        npx -y "openlint@${{ inputs.version }}" lint ${{ inputs.files }} \
           --ruleset "$RULESET" \
           --format sarif --output "${{ inputs.sarif }}" || true
     - name: Governance services
@@ -64,14 +64,14 @@ runs:
         {
           echo "---"
           if [ "${{ steps.gate.outcome }}" = "failure" ]; then
-            echo "### 🟡 Spotlight governance gate failed"
+            echo "### 🟡 API Commons OpenLint pipeline governance gate failed"
             echo ""
             echo "Need help meeting this standard? **API Evangelist** offers governance services — expert reviews, custom rulesets, and consumer-governance setup."
           else
-            echo "### ✓ Spotlight governance gate passed"
+            echo "### ✓ API Commons OpenLint pipeline governance gate passed"
             echo ""
             echo "Want to go further — custom rulesets, OWASP / security packs, or governing the APIs you consume? **API Evangelist** can help."
           fi
           echo ""
-          echo "📧 **info@apievangelist.com** &middot; [Governance services →](https://spotlight-rules.com/services/)"
+          echo "📧 **info@apievangelist.com** &middot; [Governance services →](https://apievangelist.com)"
         } >> "$GITHUB_STEP_SUMMARY"

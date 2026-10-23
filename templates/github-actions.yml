@@ -1,25 +1,25 @@
-# .github/workflows/api-governance.yml — Spotlight governance gate on every PR.
+# .github/workflows/api-governance.yml — API Commons OpenLint pipeline governance gate on every PR.
 name: API Governance
 on:
   pull_request:
   push:
     branches: [main]
 jobs:
-  spotlight:
+  openlint:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write   # to upload SARIF
     steps:
       - uses: actions/checkout@v4
-      - uses: api-commons/spotlight-pipeline@v1
+      - uses: api-commons/common-openlint-pipeline@v1
         with:
           files: 'apis/**/{openapi,asyncapi,arazzo}.{yaml,yml,json}'
-          ruleset: '.spotlight.yaml'
+          ruleset: '.openlint.yaml'
           fail-severity: 'error'
-          sarif: 'spotlight.sarif'
+          sarif: 'openlint.sarif'
       - name: Upload SARIF to code scanning
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: spotlight.sarif
+          sarif_file: openlint.sarif

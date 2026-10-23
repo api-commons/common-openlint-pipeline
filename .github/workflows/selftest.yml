@@ -9,8 +9,8 @@ jobs:
       - uses: ./
         with:
           files: 'examples/sample/openapi.yaml'
-          ruleset: '.spotlight.example.yaml'
+          ruleset: '.openlint.example.yaml'
           fail-severity: 'error'
-          sarif: 'spotlight.sarif'
+          sarif: 'openlint.sarif'
       - name: SARIF produced
-        run: test -s spotlight.sarif && echo "SARIF ok"
+        run: test -s openlint.sarif && echo "SARIF ok"

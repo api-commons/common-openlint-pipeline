@@ -1,15 +1,15 @@
-# .gitlab-ci.yml — Spotlight governance gate. Findings publish as JUnit.
-spotlight-governance:
+# .gitlab-ci.yml — API Commons OpenLint pipeline governance gate. Findings publish as JUnit.
+openlint-governance:
   image: node:22-alpine
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
   script:
-    - npx -y @spotlight-rules/spotlight-cli lint "apis/**/openapi.yaml"
-        --ruleset .spotlight.yaml
+    - npx -y openlint lint "apis/**/openapi.yaml"
+        --ruleset .openlint.yaml
         --fail-severity error
-        --format junit --output spotlight-junit.xml
+        --format junit --output openlint-junit.xml
   artifacts:
     when: always
     reports:
-      junit: spotlight-junit.xml
+      junit: openlint-junit.xml

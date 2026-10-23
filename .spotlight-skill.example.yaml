@@ -1,8 +1,0 @@
-# .spotlight-skill.yaml — governance for agent skills (SKILL.md). Extend the
-# Spotlight skill rules and add your own. See https://spotlight-rules.com/spec/
-extends:
-  - spotlight:skill
-# rules:
-#   skill-description-length:   # tighten to your house style
-#     given: $.frontmatter.description
-#     severity: error

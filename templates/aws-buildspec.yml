@@ -1,4 +1,4 @@
-# buildspec.yml — Spotlight governance gate for AWS CodeBuild.
+# buildspec.yml — API Commons OpenLint pipeline governance gate for AWS CodeBuild.
 version: 0.2
 phases:
   install:
@@ -6,11 +6,11 @@ phases:
       nodejs: 22
   build:
     commands:
-      - npx -y @spotlight-rules/spotlight-cli lint "apis/**/openapi.yaml"
-          --ruleset .spotlight.yaml --fail-severity error
-          --format junit --output spotlight-junit.xml
+      - npx -y openlint lint "apis/**/openapi.yaml"
+          --ruleset .openlint.yaml --fail-severity error
+          --format junit --output openlint-junit.xml
 reports:
-  spotlight-governance:
+  openlint-governance:
     files:
-      - spotlight-junit.xml
+      - openlint-junit.xml
     file-format: JUNITXML

@@ -1,7 +1,7 @@
-# .spotlight.yaml — your API governance ruleset. Extend the Spotlight built-ins and
-# add or override rules. See https://spotlight-rules.com/spec/
+# .openlint.yaml — your API governance ruleset. Extend the OpenLint built-ins and
+# add or override rules. See https://spec.openlint.org
 extends:
-  - ["spotlight:oas", "recommended"]
+  - ["spectral:oas", "recommended"]
 rules:
   # example: require every operation to have an operationId
   operation-operationId:

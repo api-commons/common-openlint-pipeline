@@ -1,12 +1,12 @@
-# bitbucket-pipelines.yml — Spotlight governance gate on pull requests.
+# bitbucket-pipelines.yml — API Commons OpenLint pipeline governance gate on pull requests.
 pipelines:
   pull-requests:
     '**':
       - step:
-          name: Spotlight Governance
+          name: API Commons OpenLint Governance
           image: node:22
           script:
-            - npx -y @spotlight-rules/spotlight-cli lint "apis/**/openapi.yaml"
-                --ruleset .spotlight.yaml
+            - npx -y openlint lint "apis/**/openapi.yaml"
+                --ruleset .openlint.yaml
                 --fail-severity error
                 --format pretty
